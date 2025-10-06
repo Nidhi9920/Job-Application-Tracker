@@ -1,31 +1,11 @@
-/*
-  The .menu-card class makes the card behave like a clickable item.
-*/
-.menu-card {
-    /* Set initial transition for a smooth effect */
-    transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s;
-    cursor: pointer;
-    /* Ensure it starts elevated */
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
-  }
-  
-  /*
-    This is the magic part: it defines what happens when the user hovers.
-  */
-  .menu-card:hover {
-    /* Slightly lift the card */
-    transform: translateY(-2px);
-    /* Make the background slightly darker/different */
-    background-color: #e2e6ea !important; /* A light grey/hover color */
-    /* Give it a stronger shadow */
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
-  }
-  
-  /*
-    Optional: If you want to make the card look 'active' when clicked
-  */
-  .menu-card:active {
-    transform: translateY(0);
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
-    background-color: #d3d9df !important;
-  }
+.custom-logout-btn {
+  background-color:#cd4848; /* normal bg */
+  color: white;
+  border: 1px solid #FF0000;
+  transition: background-color 0.3s ease;
+}
+
+.custom-logout-btn:hover {
+  background-color: #FF0000;; /* hover bg */
+  color: white;
+}
