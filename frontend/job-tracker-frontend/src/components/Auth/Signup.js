@@ -1,17 +1,25 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { Form, Button, Card, Container, Row, Col } from "react-bootstrap";
-
+import { Form, Button, Card, Container, Alert } from "react-bootstrap";
 
 function Signup() {
-  const [name, setName] = useState("")
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [message, setMessage] = useState({ text: "", variant: "" }); 
+  const [loading, setLoading] = useState(false); 
+
   const navigate = useNavigate();
+
+  // High-quality, professional workspace image URL
+  const backgroundImageUrl = 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setMessage({ text: "", variant: "" });
+    setLoading(true);
+
     try {
       await axios.post("http://localhost:8080/api/auth/signup", {
         name,
@@ -19,76 +27,129 @@ function Signup() {
         password,
       });
 
-      alert("Signup successful! Please login.");
-      navigate("/login");
+      setMessage({ text: "Success! Account created. Redirecting to login...", variant: "success" });
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
+      
     } catch (err) {
-      alert("Signup failed!");
+      const errorMsg = err.response?.data?.message || "Signup failed. Please try again or check your server.";
+      setMessage({ text: errorMsg, variant: "danger" });
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    // <div className="container mt-5">
-    //   <h2>Signup</h2>
-    //   <form onSubmit={handleSubmit}>
-    //    <div className="mb-3">
-    //      <label>Name</label>
-    //      <input
-    //        type="name"
-    //        className="form-control"
-    //        value={name}
-    //        onChange={(e) => setName(e.target.value)}
-    //        required
-    //      />
-    //     </div>  
-    //     <div className="mb-3">
-    //       <label>Email</label>
-    //       <input
-    //         type="email"
-    //         className="form-control"
-    //         value={email}
-    //         onChange={(e) => setEmail(e.target.value)}
-    //         required
-    //       />
-    //     </div>
-    //     <div className="mb-3">
-    //       <label>Password</label>
-    //       <input
-    //         type="password"
-    //         className="form-control"
-    //         value={password}
-    //         onChange={(e) => setPassword(e.target.value)}
-    //         required
-    //       />
-    //     </div>
-    //     <button type="submit" className="btn btn-success">
-    //       Signup
-    //     </button>
-    //   </form>
-    // </div>
-    <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: "80vh" }}>
-      <Row> 
-        <Col>
-          <Card className="p-4 shadow-sm">
-            <Card.Title className="mb-3">Sign Up</Card.Title>
-            <Form onSubmit={handleSubmit}>
-              <Form.Group className="mb-3">
-                <Form.Label>Name</Form.Label>
-                <Form.Control type="name" value={name} onChange={(e) => setName(e.target.value)} required />
-              </Form.Group>
-              <Form.Group className="mb-3"> 
-                <Form.Label>Email</Form.Label>
-                <Form.Control type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Password</Form.Label>
-                <Form.Control type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-              </Form.Group>
-              <Button variant="primary" type="submit">Login</Button>
-            </Form>
-          </Card>
-        </Col>
-      </Row>
+    // 1. BACKGROUND CONTAINER: Set image, cover properties, and full height
+    <Container 
+      className="d-flex justify-content-center align-items-center" 
+      fluid 
+      style={{ 
+        minHeight: "100vh",
+        backgroundImage: `url(${backgroundImageUrl})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+      }}
+    >
+        {/* 2. OVERLAY: Semi-transparent dark overlay for contrast */}
+        <div 
+            className="position-absolute w-100 h-100" 
+            style={{ 
+                backgroundColor: 'rgba(0, 0, 0, 0.6)', // Slightly darker overlay for forms
+                zIndex: 1 
+            }}
+        ></div>
+
+      {/* 3. CARD: Positioned above the overlay (zIndex: 2) */}
+      <Card 
+        className="p-4 shadow-lg border-0 position-relative" // Added position-relative
+        style={{ 
+            maxWidth: "400px", 
+            width: "100%", 
+            borderRadius: "1rem", 
+            zIndex: 2, // Ensures the card is above the overlay
+            backgroundColor: 'rgba(255, 255, 255, 0.95)' // Slightly transparent white card for depth
+        }} 
+      >
+        <Card.Body>
+          <div className="text-center mb-4">
+            <h2 className="fw-bold text-primary">Join Job Tracker</h2>
+            <p className="text-secondary small">
+              Your centralized hub for job application success.
+            </p>
+          </div>
+
+          {message.text && (
+            <Alert variant={message.variant} className="text-center">
+              {message.text}
+            </Alert>
+          )}
+
+          <Form onSubmit={handleSubmit}>
+            <Form.Group className="mb-3" controlId="formName">
+              <Form.Label className="fw-medium">Full Name</Form.Label>
+              <Form.Control 
+                type="text" 
+                placeholder="Enter your full name"
+                value={name} 
+                onChange={(e) => setName(e.target.value)} 
+                required 
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3" controlId="formEmail"> 
+              <Form.Label className="fw-medium">Email Address</Form.Label>
+              <Form.Control 
+                type="email" 
+                placeholder="Enter email"
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)} 
+                required 
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-4" controlId="formPassword">
+              <Form.Label className="fw-medium">Password</Form.Label>
+              <Form.Control 
+                type="password" 
+                placeholder="Minimum 6 characters"
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)} 
+                required 
+                minLength={6}
+              />
+            </Form.Group>
+            
+            <div className="d-grid">
+              <Button 
+                variant="primary" 
+                type="submit" 
+                size="lg"
+                disabled={loading}
+              >
+                {loading ? 'Creating Account...' : 'Create Account'}
+              </Button>
+            </div>
+          </Form>
+
+          <div className="text-center mt-3">
+            <small className="text-muted">
+              Already have an account?{" "}
+              <Button 
+                variant="link" 
+                onClick={() => navigate("/login")}
+                className="p-0 border-0 align-baseline text-primary fw-medium"
+              >
+                Log In
+              </Button>
+            </small>
+          </div>
+
+        </Card.Body>
+      </Card>
     </Container>
   );
 }
