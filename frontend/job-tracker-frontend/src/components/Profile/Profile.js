@@ -1,63 +1,98 @@
 // src/components/Profile/Profile.js
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, Form, Button, Row, Col, Alert } from 'react-bootstrap';
-
+import axios from 'axios';
 const Profile = () => {
-    // Mock state for user data (replace with actual context/API calls later)
-    const [userName, setUserName] = useState("Jane Doe");
-    const [userEmail, setUserEmail] = useState("jane.doe@example.com");
+    const [userName, setUserName] = useState("");
+    const [userEmail, setUserEmail] = useState("");
     const [currentPassword, setCurrentPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
-
     const [isEditing, setIsEditing] = useState(false);
     const [message, setMessage] = useState(null);
 
-    const handleUpdate = (e) => {
+    useEffect(()=>{
+        const token = localStorage.getItem("token");
+        axios.get("http://localhost:8080/api/profile/personal-details", {
+            headers: {
+              "Authorization": `Bearer ${token}`,
+              "Content-Type": "application/json"
+            }
+          })
+          .then((res) => {
+            setUserName(res.data.name);
+            setUserEmail(res.data.email);
+          })
+          .catch((err) => {
+            console.error("Error fetching profile:", err);
+          });
+        }, []);
+    
+    const handleUpdate = async (e) => {
         e.preventDefault();
-        
-        setMessage(null); // Clear previous message
-        
-        // Basic validation for password change
+        setMessage(null);
+
+        // Validate password fields
         if (newPassword || confirmPassword) {
             if (newPassword !== confirmPassword) {
                 setMessage({ variant: 'danger', text: 'New password and confirmation do not match.' });
                 return;
             }
             if (!currentPassword) {
-                setMessage({ variant: 'danger', text: 'You must enter your current password to change it.' });
+                setMessage({ variant: 'danger', text: 'Please enter your current password.' });
                 return;
             }
         }
 
-
-        // 1. Simulate API call delay
+        // Show loading message
         setMessage({ variant: 'info', text: 'Saving changes...' });
 
-        setTimeout(() => {
-            // 2. Logic to save changes goes here
-            console.log('Profile updated:', { userName, userEmail, newPassword: newPassword ? 'changed' : 'not changed' });
-            
-            // 3. Reset password fields on success
+        try {
+            // If password change fields are filled, hit backend API
+            if (newPassword && currentPassword) {
+                const response = await fetch("http://localhost:8080/api/profile/change-password", {
+                    method: "PATCH",
+                    headers: {
+                        "Authorization": `Bearer ${localStorage.getItem('token')}`, // use real token
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        currentPassword: currentPassword,
+                        newPassword: newPassword,
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || "Failed to change password");
+                }
+                console.log("Password changed")
+                setMessage({ variant: 'success', text: 'Password changed successfully! Please login again.' });
+            }
+
+            // Simulate saving profile data (name/email) — replace with real API later
+            console.log('Profile updated:', { userName, userEmail });
+
+            // Reset fields
             setCurrentPassword("");
             setNewPassword("");
             setConfirmPassword("");
 
-            // 4. Show success message
-            setMessage({ variant: 'success', text: 'Profile updated successfully! Login again if password was changed.' });
             setIsEditing(false);
-        }, 1500);
+        } catch (error) {
+            console.error("Error updating profile:", error);
+            setMessage({ variant: 'danger', text: error.message || 'Something went wrong while updating profile.' });
+        }
     };
 
     const handleCancel = () => {
-        // Simple way to reset state to mock initial values on cancel (for a real app, you'd fetch initial data again)
-        // For simplicity, we only reset password fields here.
         setCurrentPassword("");
         setNewPassword("");
         setConfirmPassword("");
         setMessage(null);
         setIsEditing(false);
-    }
+    };
 
     return (
         <Card className="shadow-lg border-0 rounded-2xl p-4 bg-white">
@@ -65,7 +100,7 @@ const Profile = () => {
                 <h2 className="text-3xl font-extrabold text-indigo-700 mb-5 pb-3 border-b-4 border-indigo-100">
                     Profile Settings
                 </h2>
-                
+
                 {message && (
                     <Alert variant={message.variant} className="mb-4">
                         {message.text}
@@ -73,14 +108,13 @@ const Profile = () => {
                 )}
 
                 <Form onSubmit={handleUpdate}>
-                    
-                    {/* --- Personal Information Section --- */}
+                    {/* Personal Info */}
                     <Card className="mb-5 p-4 border-0 shadow-sm bg-light">
                         <Card.Title className="text-xl font-bold text-gray-800 mb-3 border-b pb-2">
                             Personal Information
                         </Card.Title>
                         <Row className="mb-3">
-                            <Col md={6} className="mb-3">
+                            <Col md={6}>
                                 <Form.Group controlId="profileName">
                                     <Form.Label className="fw-bold text-gray-700">Full Name</Form.Label>
                                     <Form.Control
@@ -93,7 +127,7 @@ const Profile = () => {
                                     />
                                 </Form.Group>
                             </Col>
-                            <Col md={6} className="mb-3">
+                            <Col md={6}>
                                 <Form.Group controlId="profileEmail">
                                     <Form.Label className="fw-bold text-gray-700">Email Address</Form.Label>
                                     <Form.Control
@@ -109,13 +143,12 @@ const Profile = () => {
                         </Row>
                     </Card>
 
-                    {/* --- Password Management Section --- */}
+                    {/* Password Change */}
                     <Card className="mb-5 p-4 border-0 shadow-sm bg-light">
                         <Card.Title className="text-xl font-bold text-gray-800 mb-3 border-b pb-2">
-                             Change Password
+                            Change Password
                         </Card.Title>
-                        <Row className="mb-3">
-                            {/* Current Password Field (Required for security) */}
+                        <Row>
                             <Col md={12} className="mb-4">
                                 <Form.Group controlId="currentPassword">
                                     <Form.Label className="fw-bold text-gray-700">Current Password</Form.Label>
@@ -128,11 +161,8 @@ const Profile = () => {
                                         required={isEditing && (newPassword || confirmPassword)}
                                         className="rounded-lg shadow-sm"
                                     />
-                                    {isEditing && <Form.Text className="text-muted">Required only when changing your password.</Form.Text>}
                                 </Form.Group>
                             </Col>
-                            
-                            {/* New Password Fields */}
                             <Col md={6}>
                                 <Form.Group controlId="newPassword">
                                     <Form.Label className="fw-bold text-gray-700">New Password</Form.Label>
@@ -162,7 +192,7 @@ const Profile = () => {
                         </Row>
                     </Card>
 
-                    {/* --- Action Buttons --- */}
+                    {/* Buttons */}
                     {isEditing ? (
                         <div className="d-flex justify-content-end gap-3 mt-4">
                             <Button variant="outline-danger" onClick={handleCancel} className="px-4 rounded-pill fw-bold">
@@ -174,12 +204,15 @@ const Profile = () => {
                         </div>
                     ) : (
                         <div className="d-flex justify-content-end mt-4">
-                            <Button variant="primary" onClick={() => setIsEditing(true)} className="px-4 rounded-pill fw-bold bg-indigo-600 border-indigo-600 hover:bg-indigo-700">
+                            <Button
+                                variant="primary"
+                                onClick={() => setIsEditing(true)}
+                                className="px-4 rounded-pill fw-bold bg-indigo-600 border-indigo-600 hover:bg-indigo-700"
+                            >
                                 Edit Profile
                             </Button>
                         </div>
                     )}
-
                 </Form>
             </Card.Body>
         </Card>

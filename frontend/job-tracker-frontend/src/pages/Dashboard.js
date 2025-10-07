@@ -140,18 +140,18 @@ const Dashboard = () => {
               <Card style={getCardStyles("add")} onClick={() => handleSectionChange("add")}>
                 <MenuIcon pathData={AddIconData} />
                 <span className="ms-2">
-                  {editingJob && editingJob.id ? "✏️ Edit Current Job" : "✨ Add New Job"}
+                  {editingJob && editingJob.id ? "✏️ Edit Current Job" : "Add New Job"}
                 </span>
               </Card>
 
               <Card style={getCardStyles("jobs")} onClick={() => handleSectionChange("jobs")}>
                 <MenuIcon pathData={ListIconData} />
-                <span className="ms-2">📋 My Job Applications</span>
+                <span className="ms-2">My Job Applications</span>
               </Card>
 
               <Card style={getCardStyles("profile")} onClick={() => handleSectionChange("profile")}>
                 <MenuIcon pathData={ProfileIconData} />
-                <span className="ms-2">⚙️ Profile Settings</span>
+                <span className="ms-2">Profile Settings</span>
               </Card>
             </div>
           </Col>
