@@ -1,0 +1,4 @@
+[build]
+  base = "frontend/job-tracker-frontend"   # where to run npm install & build
+  publish = "frontend/job-tracker-frontend/build"  # where to serve the site
+  command = "npm run build"  # build command
