@@ -11,9 +11,6 @@ const Login = () => {
   
   const navigate = useNavigate();
 
-  // High-quality, professional workspace image URL for consistent background
-  // const backgroundImageUrl = 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=2940&auto=format&fit=crop';
-  //const backgroundImageUrl = "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=2940&auto=format&fit=crop";
   const backgroundImageUrl = "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2940&auto=format&fit=crop";
 
 
@@ -23,7 +20,7 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const res = await axios.post("http://localhost:8080/api/auth/login", { email, password });
+      const res = await axios.post(process.env.REACT_APP_API_URL + "/auth/login", { email, password });
       
       // Clean up the token before saving it
       const token = res.data.token;

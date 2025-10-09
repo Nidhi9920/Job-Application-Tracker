@@ -13,7 +13,7 @@ const Profile = () => {
 
     useEffect(()=>{
         const token = localStorage.getItem("token");
-        axios.get("http://localhost:8080/api/profile/personal-details", {
+        axios.get(process.env.REACT_APP_API_URL + "/profile/personal-details", {
             headers: {
               "Authorization": `Bearer ${token}`,
               "Content-Type": "application/json"
@@ -50,7 +50,7 @@ const Profile = () => {
         try {
             // If password change fields are filled, hit backend API
             if (newPassword && currentPassword) {
-                const response = await fetch("http://localhost:8080/api/profile/change-password", {
+                const response = await fetch(process.env.REACT_APP_API_URL + "/profile/change-password", {
                     method: "PATCH",
                     headers: {
                         "Authorization": `Bearer ${localStorage.getItem('token')}`, // use real token
