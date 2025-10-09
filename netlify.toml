@@ -1,4 +1,11 @@
+# netlify.toml for Job Tracker Frontend
 [build]
-  base = "frontend/job-tracker-frontend"   # where to run npm install & build
-  publish = "frontend/job-tracker-frontend/build"  # where to serve the site
-  command = "npm run build"  # build command
+  base = "."                   # Base directory for build commands
+  publish = "build"            # Folder to publish
+  command = "npm run build"    # Build command
+
+[context.production.environment]
+  # Backend API URL
+  REACT_APP_API_URL = "https://jobtracker-backend-production-ea98.up.railway.app"
+
+
