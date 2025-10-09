@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAllJobs, deleteJob } from "../../api/jobApi";
 import { Card, Button } from "react-bootstrap";
@@ -7,7 +7,8 @@ function JobList({ onEdit, reloadFlag }) {
   const [jobs, setJobs] = useState([]);
   const navigate = useNavigate();
 
-  const fetchJobs = async () => {
+  // Wrap fetchJobs in useCallback with reloadFlag as dependency
+  const fetchJobs = useCallback(async () => {
     const token = localStorage.getItem("token");
     if (!token) {
       alert("You must be logged in!");
@@ -23,17 +24,18 @@ function JobList({ onEdit, reloadFlag }) {
       alert("Failed to fetch jobs. Please login again.");
       navigate("/login");
     }
-  };
+  }, [navigate, reloadFlag]); // include navigate & reloadFlag if used inside
 
+  // useEffect depends on fetchJobs
   useEffect(() => {
     fetchJobs();
-  }, [reloadFlag]);
+  }, [fetchJobs]);
 
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this job?")) return;
     try {
       await deleteJob(id);
-      fetchJobs();
+      fetchJobs(); // refresh list after deletion
     } catch (err) {
       console.error(err);
       alert("Failed to delete job.");
@@ -42,7 +44,7 @@ function JobList({ onEdit, reloadFlag }) {
 
   return (
     <div>
-       <h5>My Jobs</h5>
+      <h5>My Jobs</h5>
       {jobs.length === 0 ? (
         <p>No jobs found.</p>
       ) : (
