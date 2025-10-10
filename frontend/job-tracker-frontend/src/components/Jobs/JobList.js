@@ -7,7 +7,6 @@ function JobList({ onEdit, reloadFlag }) {
   const [jobs, setJobs] = useState([]);
   const navigate = useNavigate();
 
-  // Wrap fetchJobs in useCallback with reloadFlag as dependency
   const fetchJobs = useCallback(async () => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -18,15 +17,19 @@ function JobList({ onEdit, reloadFlag }) {
 
     try {
       const response = await getAllJobs();
-      setJobs(response.data);
+      if (Array.isArray(response.data)) {
+        setJobs(response.data);
+      } else {
+        console.error("Unexpected response:", response.data);
+        setJobs([]);
+      }
     } catch (err) {
       console.error(err);
       alert("Failed to fetch jobs. Please login again.");
       navigate("/login");
     }
-  }, [navigate, reloadFlag]); // include navigate & reloadFlag if used inside
+  }, [navigate, reloadFlag]);
 
-  // useEffect depends on fetchJobs
   useEffect(() => {
     fetchJobs();
   }, [fetchJobs]);
@@ -35,7 +38,7 @@ function JobList({ onEdit, reloadFlag }) {
     if (!window.confirm("Are you sure you want to delete this job?")) return;
     try {
       await deleteJob(id);
-      fetchJobs(); // refresh list after deletion
+      fetchJobs();
     } catch (err) {
       console.error(err);
       alert("Failed to delete job.");
@@ -56,9 +59,9 @@ function JobList({ onEdit, reloadFlag }) {
                 <Card.Subtitle className="mb-2 text-muted">{job.company}</Card.Subtitle>
                 <Card.Text>
                   <strong>Status:</strong> {job.status}<br />
-                  <strong>Applied On:</strong> {job.appliedDate}<br />
+                  <strong>Applied On:</strong> {job.appliedDate || "N/A"}<br />
                   {job.description}<br />
-                  <em>{job.notes}</em>
+                  <em>{job.notes || "No notes"}</em>
                 </Card.Text>
                 <Button variant="warning" size="sm" className="me-2" onClick={() => onEdit(job)}>
                   Edit
