@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = process.env.REACT_APP_API_UR  + "/jobs";
+const API_URL = process.env.REACT_APP_API_URL  + "/jobs";
 
 // Helper: get headers with JWT token
 const authHeader = () => {
