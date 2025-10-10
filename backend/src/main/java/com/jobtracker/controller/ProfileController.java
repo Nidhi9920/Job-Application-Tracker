@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-@CrossOrigin(origins = "https://your-frontend-name.netlify.app")
+@CrossOrigin(origins = "https://job-nest-app.netlify.app")
 @RestController
 @RequestMapping("/api/profile")
 public class ProfileController {
